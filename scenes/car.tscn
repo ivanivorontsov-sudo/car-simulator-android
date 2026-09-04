@@ -1,0 +1,81 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car.gd" id="1_car"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_chassis"]
+size = Vector3(1.38, 0.30, 3.35)
+
+[node name="Car" type="VehicleBody3D"]
+mass = 1320.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.38, 0.04)
+continuous_cd = true
+script = ExtResource("1_car")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+shape = SubResource("BoxShape3D_chassis")
+
+[node name="WheelFL" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.40, -1.28)
+use_as_steering = true
+use_as_traction = false
+wheel_radius = 0.34
+wheel_rest_length = 0.15
+suspension_travel = 0.28
+wheel_friction_slip = 4.85
+suspension_stiffness = 72.0
+suspension_max_force = 18500.0
+damping_compression = 2.85
+damping_relaxation = 4.15
+
+[node name="WheelFR" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.62, 0.40, -1.28)
+use_as_steering = true
+use_as_traction = false
+wheel_radius = 0.34
+wheel_rest_length = 0.15
+suspension_travel = 0.28
+wheel_friction_slip = 4.85
+suspension_stiffness = 72.0
+suspension_max_force = 18500.0
+damping_compression = 2.85
+damping_relaxation = 4.15
+
+[node name="WheelBL" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.40, 1.28)
+use_as_steering = false
+use_as_traction = true
+wheel_radius = 0.34
+wheel_rest_length = 0.15
+suspension_travel = 0.28
+wheel_friction_slip = 4.55
+suspension_stiffness = 72.0
+suspension_max_force = 18500.0
+damping_compression = 2.85
+damping_relaxation = 4.15
+
+[node name="WheelBR" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.62, 0.40, 1.28)
+use_as_steering = false
+use_as_traction = true
+wheel_radius = 0.34
+wheel_rest_length = 0.15
+suspension_travel = 0.28
+wheel_friction_slip = 4.55
+suspension_stiffness = 72.0
+suspension_max_force = 18500.0
+damping_compression = 2.85
+damping_relaxation = 4.15
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="EngineAudio" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+bus = &"Engine"
+
+[node name="SkidAudio" type="AudioStreamPlayer3D" parent="."]
+volume_db = -40.0
+bus = &"Tires"
+attenuation_model = 1
+max_distance = 40.0

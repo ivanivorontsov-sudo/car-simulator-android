@@ -1,0 +1,13 @@
+.godot/
+*.translation
+export.cfg
+build/
+android/
+*.apk
+*.aab
+.import/
+*.tmp
+.DS_Store
+Thumbs.db
+*.keystore
+!debug.keystore.example

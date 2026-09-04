@@ -1,0 +1,247 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/tachometer.gd" id="2_tach"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.07, 0.1, 0.72)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16
+content_margin_top = 10
+content_margin_right = 16
+content_margin_bottom = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gear"]
+bg_color = Color(0.08, 0.09, 0.12, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.78, 0.22, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rpm_bg"]
+bg_color = Color(0.08, 0.08, 0.1, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rpm_fill"]
+bg_color = Color(0.25, 0.85, 0.55, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dmg_bg"]
+bg_color = Color(0.08, 0.08, 0.1, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dmg_fill"]
+bg_color = Color(0.35, 0.75, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="LabelSettings" id="LabelSettings_wreck"]
+font_size = 28
+font_color = Color(1, 0.35, 0.28, 1)
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.75)
+
+[sub_resource type="LabelSettings" id="LabelSettings_speed"]
+font_size = 64
+font_color = Color(0.95, 0.97, 1, 1)
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.7)
+
+[sub_resource type="LabelSettings" id="LabelSettings_gear"]
+font_size = 42
+font_color = Color(1, 0.92, 0.45, 1)
+outline_size = 6
+outline_color = Color(0, 0, 0, 0.75)
+
+[node name="HUD" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SpeedBox" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -420.0
+offset_right = -220.0
+offset_bottom = -300.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/SpeedBox"]
+layout_mode = 2
+
+[node name="Speed" type="Label" parent="Root/SpeedBox/VBox"]
+layout_mode = 2
+text = "0"
+label_settings = SubResource("LabelSettings_speed")
+horizontal_alignment = 2
+
+[node name="Unit" type="Label" parent="Root/SpeedBox/VBox"]
+layout_mode = 2
+text = "km/h"
+horizontal_alignment = 2
+
+[node name="GearBox" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 64.0
+offset_right = 130.0
+offset_bottom = 150.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_gear")
+
+[node name="Gear" type="Label" parent="Root/GearBox"]
+layout_mode = 2
+text = "1"
+label_settings = SubResource("LabelSettings_gear")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RpmBox" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -78.0
+offset_right = 260.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RpmBar" type="ProgressBar" parent="Root/RpmBox"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_rpm_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_rpm_fill")
+max_value = 7200.0
+value = 850.0
+show_percentage = false
+
+[node name="RpmText" type="Label" parent="Root/RpmBox"]
+layout_mode = 2
+text = "850 RPM"
+horizontal_alignment = 1
+
+[node name="CamLabel" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 24.0
+offset_right = -28.0
+offset_bottom = 56.0
+text = "CAM  CHASE  (C)"
+horizontal_alignment = 2
+
+[node name="Hint" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -420.0
+offset_top = 24.0
+offset_right = 420.0
+offset_bottom = 88.0
+text = "Touch: steer pad · GAS · BRAKE · HB · CAM · RESET   |   Keyboard still works in editor"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+
+
+[node name="DamageBox" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 150.0
+offset_top = 64.0
+offset_right = 340.0
+offset_bottom = 150.0
+
+[node name="DamageLabel" type="Label" parent="Root/DamageBox"]
+layout_mode = 2
+text = "DMG  0%"
+horizontal_alignment = 0
+
+[node name="DamageBar" type="ProgressBar" parent="Root/DamageBox"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_dmg_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_dmg_fill")
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="WreckLabel" type="Label" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -320.0
+offset_top = 96.0
+offset_right = 320.0
+offset_bottom = 140.0
+text = "CRASH — restart in 5…"
+label_settings = SubResource("LabelSettings_wreck")
+horizontal_alignment = 1
+
+[node name="Tach" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -118.0
+offset_top = -268.0
+offset_right = 118.0
+offset_bottom = -88.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_tach")
+
+[node name="Title" type="Label" parent="Root"]
+layout_mode = 1
+offset_left = 28.0
+offset_top = 20.0
+offset_right = 420.0
+offset_bottom = 56.0
+text = "CAR SIMULATOR"

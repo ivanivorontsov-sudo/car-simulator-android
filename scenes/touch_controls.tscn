@@ -1,0 +1,112 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/touch_controls.gd" id="1_touch"]
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_touch")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SteerPad" type="Panel" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -220.0
+offset_right = 260.0
+offset_bottom = -24.0
+grow_vertical = 0
+modulate = Color(1, 1, 1, 0.55)
+
+[node name="Label" type="Label" parent="Root/SteerPad"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 8.0
+offset_right = 40.0
+offset_bottom = 32.0
+text = "STEER"
+horizontal_alignment = 1
+
+[node name="Knob" type="Panel" parent="Root/SteerPad"]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 66.0
+offset_right = 150.0
+offset_bottom = 130.0
+modulate = Color(0.95, 0.85, 0.25, 0.9)
+
+[node name="RightButtons" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -280.0
+offset_right = -28.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 16
+
+[node name="Gas" type="Button" parent="Root/RightButtons"]
+custom_minimum_size = Vector2(160, 110)
+layout_mode = 2
+focus_mode = 0
+text = "GAS"
+
+[node name="Brake" type="Button" parent="Root/RightButtons"]
+custom_minimum_size = Vector2(160, 110)
+layout_mode = 2
+focus_mode = 0
+text = "BRAKE"
+
+[node name="TopButtons" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -520.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 72.0
+grow_horizontal = 0
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Handbrake" type="Button" parent="Root/TopButtons"]
+custom_minimum_size = Vector2(110, 48)
+layout_mode = 2
+focus_mode = 0
+text = "HB"
+
+[node name="Camera" type="Button" parent="Root/TopButtons"]
+custom_minimum_size = Vector2(110, 48)
+layout_mode = 2
+focus_mode = 0
+text = "CAM"
+
+[node name="Reset" type="Button" parent="Root/TopButtons"]
+custom_minimum_size = Vector2(110, 48)
+layout_mode = 2
+focus_mode = 0
+text = "RESET"
+
+[node name="Pause" type="Button" parent="Root/TopButtons"]
+custom_minimum_size = Vector2(90, 48)
+layout_mode = 2
+focus_mode = 0
+text = "❚❚"
