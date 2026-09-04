@@ -12,7 +12,7 @@ jobs:
   android-apk:
     name: Export debug APK
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     env:
       GODOT_VERSION: "4.4.1"
       GODOT_TAG: "4.4.1-stable"
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: "tools platform-tools platforms;android-34 build-tools;34.0.0 ndk;23.2.8568313 cmdline-tools;latest"
+          packages: "tools platform-tools platforms;android-34 build-tools;34.0.0 cmdline-tools;latest"
 
       - name: Install OS deps
         run: |
@@ -57,7 +57,7 @@ jobs:
           unzip -o /tmp/templates.tpz -d /tmp/godot-templates
           mv /tmp/godot-templates/templates/* "${TEMPLATE_DIR}/"
           ls -lh "${TEMPLATE_DIR}" | head -40
-          test -f "${TEMPLATE_DIR}/android_debug.apk" || test -f "${TEMPLATE_DIR}/android_source.zip"
+          test -f "${TEMPLATE_DIR}/android_debug.apk"
 
       - name: Create debug keystore
         run: |
@@ -91,14 +91,13 @@ jobs:
           } > "${HOME}/.config/godot/editor_settings-4.tres"
           cat "${HOME}/.config/godot/editor_settings-4.tres"
 
-      - name: Import project + install Android build template
+      - name: Import project
         run: |
           set -euo pipefail
           mkdir -p build/android
-          godot --headless --path . --import --quit || true
-          godot --headless --path . --editor --quit-after 1 || true
-          godot --headless --path . --install-android-build-template
-          test -d android/build
+          # Import only — avoid --editor which can hang headless on CI
+          timeout 180 godot --headless --path . --import --quit || true
+          test -d .godot
 
       - name: Export debug APK
         env:
@@ -107,7 +106,7 @@ jobs:
           GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
         run: |
           set -euo pipefail
-          godot --headless --path . --verbose --export-debug "Android" "build/android/CarSimulator-debug.apk"
+          timeout 300 godot --headless --path . --verbose --export-debug "Android" "build/android/CarSimulator-debug.apk"
           ls -lh build/android/
           test -f build/android/CarSimulator-debug.apk
 
