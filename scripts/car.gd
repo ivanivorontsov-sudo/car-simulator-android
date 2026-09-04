@@ -21,7 +21,7 @@ const DRIVELINE_EFFICIENCY := 0.90
 const WHEEL_RADIUS := 0.34
 const VISUAL_SCALE := 2.0
 const MAX_ENGINE_FORCE := 7800.0
-const MAX_YAW_RATE := 2.05
+const MAX_YAW_RATE := 2.45
 const CRITICAL_DAMAGE := 1.0
 const WRECK_RESTART_DELAY := 5.0
 
@@ -104,7 +104,7 @@ func _ready() -> void:
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
 	center_of_mass = Vector3(0.0, -0.38, 0.04)
 	linear_damp = 0.16
-	angular_damp = 2.05
+	angular_damp = 1.0
 	continuous_cd = true
 	contact_monitor = true
 	max_contacts_reported = 8
@@ -323,7 +323,7 @@ func _setup_wheels() -> void:
 	for w in wheels:
 		w.wheel_radius = WHEEL_RADIUS
 		w.wheel_rest_length = 0.15
-		w.wheel_friction_slip = 4.7
+		w.wheel_friction_slip = 4.0
 		w.suspension_stiffness = 72.0
 		w.suspension_max_force = 18500.0
 		w.suspension_travel = 0.28
@@ -338,10 +338,11 @@ func _setup_wheels() -> void:
 	wheel_fr.use_as_traction = false
 	wheel_bl.use_as_traction = true
 	wheel_br.use_as_traction = true
-	wheel_fl.wheel_friction_slip = 5.0
-	wheel_fr.wheel_friction_slip = 5.0
-	wheel_bl.wheel_friction_slip = 4.65
-	wheel_br.wheel_friction_slip = 4.65
+	# Arcade-simcade grip (~3.8–4.2): high slip values scrub speed in corners.
+	wheel_fl.wheel_friction_slip = 4.1
+	wheel_fr.wheel_friction_slip = 4.1
+	wheel_bl.wheel_friction_slip = 3.9
+	wheel_br.wheel_friction_slip = 3.9
 
 
 func _setup_smoke() -> void:
@@ -1013,6 +1014,9 @@ func _update_engine(delta: float, speed_ms: float) -> void:
 	if throttle_eff < 0.02:
 		wheel_force = 0.0
 
+	# Mild cornering assist: preserve drive while holding steer + throttle.
+	if absf(steer_input) > 0.2 and throttle_input > 0.2 and gear >= 1:
+		wheel_force *= 1.06
 	wheel_force = clampf(wheel_force, -MAX_ENGINE_FORCE, MAX_ENGINE_FORCE)
 	_engine_force_smoothed = lerpf(_engine_force_smoothed, wheel_force, 1.0 - exp(-delta * 7.0))
 	engine_force = _engine_force_smoothed
@@ -1035,9 +1039,12 @@ func _apply_brakes() -> void:
 	wheel_fr.brake = front
 	wheel_bl.brake = rear
 	wheel_br.brake = rear
-	var base_f := 5.0 * _surface_grip
-	var base_r := 4.65 * _surface_grip
-	var rear_grip := lerpf(base_r, 2.2 * _surface_grip, handbrake_input)
+	var base_f := 4.1 * _surface_grip
+	var base_r := 3.9 * _surface_grip
+	# Soften front lateral grip under steer so corners carve instead of scrubbing.
+	var steer_amt := clampf(maxf(absf(steer_input), absf(steering) / maxf(max_steer_angle, 0.01)), 0.0, 1.0)
+	base_f = lerpf(base_f, 3.55 * _surface_grip, steer_amt * 0.85)
+	var rear_grip := lerpf(base_r, 2.0 * _surface_grip, handbrake_input)
 	wheel_fl.wheel_friction_slip = base_f
 	wheel_fr.wheel_friction_slip = base_f
 	wheel_bl.wheel_friction_slip = rear_grip
@@ -1076,16 +1083,43 @@ func _apply_anti_roll(_delta: float) -> void:
 
 
 func _apply_stability(delta: float) -> void:
-	var max_yaw := lerpf(MAX_YAW_RATE, 1.05, clampf(absf(speed_kmh) / 160.0, 0.0, 1.0))
+	## v1.3.4: do not kill power on normal cornering. High slip while steering
+	## + throttle is expected; only slash drive on uncontrolled spin-out.
+	var steer_mag := maxf(absf(steer_input), absf(steering) / maxf(max_steer_angle, 0.01))
+	var actively_steering := steer_mag > 0.18
+	var powered_corner := actively_steering and throttle_input > 0.2
+
+	# Higher yaw ceiling while steering into the turn (still capped vs wild spins).
+	var yaw_hi := MAX_YAW_RATE
+	var yaw_lo := 1.35
+	if actively_steering:
+		yaw_hi = 2.65
+		yaw_lo = 1.80
+	var max_yaw := lerpf(yaw_hi, yaw_lo, clampf(absf(speed_kmh) / 160.0, 0.0, 1.0))
 	if absf(angular_velocity.y) > max_yaw:
 		angular_velocity.y = signf(angular_velocity.y) * max_yaw
 
 	if slipping > 0.28 and absf(speed_kmh) > 12.0:
 		var damp_k := clampf((slipping - 0.28) / 0.5, 0.0, 1.0)
-		angular_velocity.y = lerpf(angular_velocity.y, 0.0, 1.0 - exp(-delta * (3.8 + damp_k * 8.0)))
-		engine_force *= lerpf(1.0, 0.25, damp_k)
-		if signf(angular_velocity.y) == signf(steering) and absf(steering) > 0.05:
-			angular_velocity.y *= 0.90
+		# VehicleBody3D: +steering = left; +yaw ≈ CCW — matching signs = carving.
+		var yaw_with_steer := signf(angular_velocity.y) == signf(steering) and absf(steering) > 0.05
+		var opposite_spin := (not yaw_with_steer) and absf(angular_velocity.y) > 0.85
+		var uncontrolled := opposite_spin or slipping > 0.75
+
+		if powered_corner and yaw_with_steer and not uncontrolled:
+			# Soft yaw settle only — keep most engine force so the car carves.
+			angular_velocity.y = lerpf(angular_velocity.y, 0.0, 1.0 - exp(-delta * (1.05 + damp_k * 2.0)))
+			engine_force *= lerpf(1.0, 0.88, damp_k)
+		elif uncontrolled:
+			angular_velocity.y = lerpf(angular_velocity.y, 0.0, 1.0 - exp(-delta * (4.4 + damp_k * 9.0)))
+			engine_force *= lerpf(1.0, 0.32, damp_k)
+		else:
+			# Coasting / light steer slip: moderate help; light cut if not throttling through.
+			angular_velocity.y = lerpf(angular_velocity.y, 0.0, 1.0 - exp(-delta * (2.2 + damp_k * 4.5)))
+			if powered_corner:
+				engine_force *= lerpf(1.0, 0.80, damp_k)
+			else:
+				engine_force *= lerpf(1.0, 0.55, damp_k)
 
 
 func _update_slip_fx() -> void:

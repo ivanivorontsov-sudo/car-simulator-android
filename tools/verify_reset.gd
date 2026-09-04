@@ -106,6 +106,35 @@ func _init() -> void:
 	if mf:
 		print("fps_fov=", mf.get_string(1))
 
+	# v1.3.4 cornering feel: no hard power-cut on normal slip + lower scrub
+	for needle in [
+		"powered_corner",
+		"engine_force *= lerpf(1.0, 0.88, damp_k)",
+		"angular_damp = 1.0",
+		"wheel_friction_slip = 4.1",
+		"base_f := 4.1 * _surface_grip",
+	]:
+		if needle not in car_src:
+			push_error("missing cornering retune: %s" % needle)
+			code = 1
+		else:
+			print("found ", needle)
+	if "engine_force *= lerpf(1.0, 0.25, damp_k)" in car_src:
+		push_error("old hard power-cut (0.25) still present")
+		code = 1
+	var re_yaw := RegEx.new()
+	re_yaw.compile(r"MAX_YAW_RATE := ([0-9.]+)")
+	var myaw := re_yaw.search(car_src)
+	if myaw == null:
+		push_error("MAX_YAW_RATE missing")
+		code = 1
+	else:
+		var yawv := myaw.get_string(1).to_float()
+		print("MAX_YAW_RATE=", yawv)
+		if yawv < 2.2 or yawv > 2.8:
+			push_error("MAX_YAW_RATE out of [2.2,2.8]: %s" % yawv)
+			code = 1
+
 	# Live world + car reset path
 	var world := WorldBuilder.new()
 	root.add_child(world)

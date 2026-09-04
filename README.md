@@ -4,7 +4,7 @@ Android port of **Car Simulator** (Godot 4.4) — same track, vehicle physics, F
 
 Порт **Автосимулятора** на Android (Godot 4.4) — та же трасса, физика, камеры FPS/преследование, повреждения и авто-рестарт, с **сенсорным управлением**.
 
-**v1.3.3-android** · package `org.ivanivorontsov.carsimulator` · landscape · mobile renderer
+**v1.3.4-android** · package `org.ivanivorontsov.carsimulator` · landscape · mobile renderer
 
 ![Godot](https://img.shields.io/badge/Godot-4.4.1-478cbf) ![License](https://img.shields.io/badge/license-MIT-green) ![Platform](https://img.shields.io/badge/platform-Android-green)
 
