@@ -88,8 +88,9 @@ jobs:
             echo 'export/android/debug_keystore_pass = "android"'
             echo 'export/android/force_system_user = false'
             echo 'export/android/shutdown_adb_on_exit = true'
-          } > "${HOME}/.config/godot/editor_settings-4.tres"
-          cat "${HOME}/.config/godot/editor_settings-4.tres"
+          } > "${HOME}/.config/godot/editor_settings-4.4.tres"
+          cp "${HOME}/.config/godot/editor_settings-4.4.tres" "${HOME}/.config/godot/editor_settings-4.tres"
+          cat "${HOME}/.config/godot/editor_settings-4.4.tres"
 
       - name: Import project
         run: |
