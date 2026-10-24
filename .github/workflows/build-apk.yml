@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   android-apk:
@@ -119,3 +119,12 @@ jobs:
           path: build/android/*.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Publish GitHub release
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="build-$(date -u +%Y%m%d)-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" build/android/*.apk --target "$GITHUB_SHA" --title "CarSimulator-Android $TAG" --notes "Автосборка из $GITHUB_SHA"
